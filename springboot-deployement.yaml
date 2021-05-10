@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-deployment
+  labels:
+    app: spring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      containers:
+      - name: spring
+        image: yasantha1995/misynergy
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef: 
+              name: mysql-secret
+              key:  mysql-root-username
+        - name: MYSQL_PASS
+          secretKeyRef: 
+              name: mysql-secret
+              key:  mysql-root-password
+        - name: MYSQL_URL
+          configMapKeyRef: 
+              name: mysql-configmap
+              key:  database_url
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service
+spec:
+  selector:
+    app: spring
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 30000
+      targetPort: 8080
